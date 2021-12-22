@@ -853,5 +853,3 @@ config SPECULATIVE_PAGE_FAULT
 	 allocating, it is failing its processing and a classic page fault
 	 is then tried.
 endmenu
-
-source "mm/sec_mm/Kconfig"
