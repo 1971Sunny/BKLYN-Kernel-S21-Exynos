@@ -446,6 +446,20 @@ static bool check_pcket_filter(struct sk_buff *skb)
 }
 #endif
 
+#ifdef CONFIG_MCPS_MODULE
+static int is_udp_packet(struct sk_buff *skb)
+{
+	switch (skb->data[0] & 0xF0) {
+	case 0x40:
+		return (ip_hdr(skb)->protocol == IPPROTO_UDP);
+	case 0x60:
+		return (ipv6_hdr(skb)->nexthdr == NEXTHDR_UDP);
+	}
+
+	return 0;
+}
+#endif
+
 static int rx_multi_pdp(struct sk_buff *skb)
 {
 	struct link_device *ld = skbpriv(skb)->ld;
@@ -519,8 +533,10 @@ static int rx_multi_pdp(struct sk_buff *skb)
 #endif
 
 #ifdef CONFIG_MCPS_MODULE
-	if (!mcps_try_gro(skb))
-		return len;
+	if (!is_udp_packet(skb)) {
+		if (!mcps_try_gro(skb))
+			return len;
+	}
 #endif
 
 	napi = skbpriv(skb)->napi;
